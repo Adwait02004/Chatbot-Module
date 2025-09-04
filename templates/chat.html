@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeepSeek Chatbot</title>
+    <style>
+        body{
+            background-color: #f5f6fa;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container{
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        .header{
+            background: #2f8bfd;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #ebebeb;
+        }
+        .msg{
+            max-width: 70%;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            clear: both;
+        }
+        .msg.user{
+            background: #2f8bfd;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        .msg.bot{
+            background: #e0e0e0;
+            color: black;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        form{
+            display:flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background: white;
+            border-radius: 0 0 8px 8px;
+        }
+        input[type="text"]{
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            outline: none;
+        }
+        button{
+            background: #2f8bfd;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="header">Deepseek Chatbot</div>
+    <div id="chat-box"></div>
+    <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required />
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const chatBox = document.getElementById('chat-box');
+
+    function appendMessage(text, className){
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = text;
+        msgDiv.className = 'msg ' + className;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userText = input.value.trim();
+        if (!userText) return;
+        appendMessage(userText, 'user');
+        input.value = '';
+
+        try{
+            const response = await fetch('/get', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `msg=${encodeURIComponent(userText)}`
+            });
+            const data = await response.json();
+            appendMessage(data.response, 'bot');
+        } catch (error) {
+            appendMessage('Error retrieving response. Please try again.', 'bot');
+        }
+    });
+</script>
+</body>
+</html>
